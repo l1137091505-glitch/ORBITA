@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Check, CircleDollarSign, Coins, ExternalLink, Gauge, LoaderCircle, Orbit, RefreshCw, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { Activity, ArrowDown, ArrowUpRight, BarChart3, Check, CircleGauge, Coins, ExternalLink, Gauge, Layers3, LoaderCircle, Orbit, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { BOT_CHAIN, CONTRACT_ADDRESS, bot, connectWallet, injected, parseEther, readContract, short, writeContract } from "./chain";
 import type { JsonRpcSigner } from "ethers";
 
@@ -117,80 +117,69 @@ function App() {
   const primaryLabel = mode === "deposit" ? "ENTER ORBIT" : mode === "withdraw" ? "RETURN PRINCIPAL" : mode === "claim" ? "CLAIM REWARDS" : mode === "compound" ? "BOOST POSITION" : "FUND REWARD RESERVE";
   const canExecute = !busy && ((mode === "claim" || mode === "compound") ? livePending > 0n : Number(amount) > 0);
 
-  return <div className="app-shell">
-    <header className="topbar">
-      <a className="brand" href="#top" aria-label="ORBITAL home"><span className="brand-mark"><Orbit size={23}/></span><span>ORBITAL</span><small>NATIVE YIELD ARRAY</small></a>
-      <nav><a href="#console">Console</a><a href="#protocol">Protocol</a><a href="#safety">Safety</a></nav>
-      <button className="wallet-button" onClick={connect} disabled={busy === "connect"}>
-        {busy === "connect" ? <LoaderCircle className="spin" size={18}/> : <Wallet size={18}/>}<span>{account ? short(account) : "Connect wallet"}</span>
-      </button>
-    </header>
+  return <div className="terminal-shell">
+    <aside className="side-rail">
+      <a className="rail-logo" href="#overview" aria-label="ORBITAL overview"><Orbit size={25}/><span>O</span></a>
+      <nav>
+        <a className="active" href="#overview"><CircleGauge size={20}/><span>Overview</span></a>
+        <a href="#position"><Layers3 size={20}/><span>Position</span></a>
+        <a href="#system"><BarChart3 size={20}/><span>System</span></a>
+        <a href="#security"><ShieldCheck size={20}/><span>Security</span></a>
+      </nav>
+      <div className="rail-status"><i/><span>677</span></div>
+    </aside>
 
-    {!CONTRACT_ADDRESS && <div className="preview-strip"><span>PREVIEW SIGNAL</span> Deploy the vault and set <b>VITE_ORBITAL_ADDRESS</b> to activate live transactions.</div>}
+    <div className="workspace">
+      <header className="workspace-header">
+        <div><small>ORBITAL / BOT YIELD TERMINAL</small><h1>Position overview</h1></div>
+        <div className="header-actions"><span className="live-pill"><i/> BOT CHAIN LIVE</span><button onClick={connect} disabled={busy === "connect"}>{busy === "connect" ? <LoaderCircle className="spin" size={17}/> : <Wallet size={17}/>} {account ? short(account) : "Connect wallet"}</button></div>
+      </header>
 
-    <main id="top">
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">BOT CHAIN / BLOCK 677 / YIELD ONLINE</p>
-          <h1>Put idle BOT<br/><em>into motion.</em></h1>
-          <p className="lede">A transparent native-token position with rewards measured every second and controlled from one clean console.</p>
-          <div className="hero-actions"><a className="button solid" href="#console">Open console <ArrowDownLeft size={18}/></a><a className="text-link" href="#protocol">Read the mechanics <ArrowUpRight size={16}/></a></div>
-        </div>
-        <div className="orbit-visual" aria-label="ORBITAL yield signal">
-          <div className="orbit orbit-a"><span/></div><div className="orbit orbit-b"><span/></div><div className="orbit orbit-c"><span/></div>
-          <div className="rate-core"><small>FIXED APR</small><strong>12.80</strong><span>%</span><i>PER SECOND ACCRUAL</i></div>
-          <div className="coordinate top">R / 12.80</div><div className="coordinate bottom">T+ {String(tick).padStart(4, "0")} SEC</div>
-        </div>
-      </section>
+      {!CONTRACT_ADDRESS && <div className="terminal-alert"><strong>DEMO DATA</strong><span>Set VITE_ORBITAL_ADDRESS after contract deployment to enable transactions.</span></div>}
 
-      <section className="ticker-grid">
-        <article><span>Total principal</span><strong>{bot(snapshot.totalPrincipal)} BOT</strong><small>secured in active positions</small></article>
-        <article><span>Reward reserve</span><strong>{bot(snapshot.rewardReserve)} BOT</strong><small>available for claims</small></article>
-        <article><span>Rewards routed</span><strong>{bot(snapshot.totalPaid)} BOT</strong><small>claimed or compounded</small></article>
-        <article className="signal"><span>Network state</span><strong><i/> ONLINE</strong><small>BOT Chain · 677</small></article>
-      </section>
+      <main className="dashboard" id="overview">
+        <section className="balance-panel panel">
+          <div className="panel-kicker"><span>MY ACTIVE PRINCIPAL</span><span>BOT / NATIVE</span></div>
+          <div className="balance-row"><strong>{bot(snapshot.principal, 6)}</strong><b>BOT</b></div>
+          <div className="delta"><ArrowUpRight size={15}/> 12.80% fixed APR <span>·</span> no lockup</div>
+          <div className="chart" aria-label="decorative position chart"><svg viewBox="0 0 700 160" preserveAspectRatio="none"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff6b35" stopOpacity=".35"/><stop offset="1" stopColor="#ff6b35" stopOpacity="0"/></linearGradient></defs><path className="area" d="M0,142 C70,125 92,132 145,108 C210,78 245,102 305,78 C370,52 410,65 462,40 C520,13 565,43 615,25 C652,12 680,17 700,5 L700,160 L0,160 Z"/><path className="line" d="M0,142 C70,125 92,132 145,108 C210,78 245,102 305,78 C370,52 410,65 462,40 C520,13 565,43 615,25 C652,12 680,17 700,5"/></svg><div className="chart-axis"><span>ENTRY</span><span>NOW</span></div></div>
+        </section>
 
-      <section className="console-section" id="console">
-        <div className="section-head"><div><p className="eyebrow red">POSITION CONTROL</p><h2>One position.<br/>Five clean moves.</h2></div><p>Principal stays distinct from the funded reward reserve. You choose when value enters, compounds, claims, or returns.</p></div>
-        <div className="console-grid">
-          <aside className="position-card">
-            <div className="card-label">YOUR ORBIT</div>
-            <div className="position-number"><span>ACTIVE PRINCIPAL</span><strong>{bot(snapshot.principal, 6)}</strong><i>BOT</i></div>
-            <div className="pending-panel"><span>LIVE REWARDS</span><strong>+{bot(livePending, 8)} BOT</strong><small>updates every second</small></div>
-            <dl><div><dt>Annual rate</dt><dd>12.80%</dd></div><div><dt>Lock period</dt><dd>None</dd></div><div><dt>Last checkpoint</dt><dd>{snapshot.updatedAt ? new Date(snapshot.updatedAt * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "—"}</dd></div></dl>
-          </aside>
+        <section className="reward-panel panel">
+          <div className="panel-kicker"><span>LIVE REWARDS</span><Activity size={17}/></div>
+          <strong className="reward-number">+{bot(livePending, 8)}</strong><span className="reward-unit">BOT</span>
+          <div className="pulse-line"><i/><i/><i/><i/><i/><i/><i/><i/></div>
+          <p>Accruing every second</p>
+          <button onClick={() => setMode("claim")}>Prepare claim <ArrowUpRight size={16}/></button>
+        </section>
 
-          <div className="control-card">
-            <div className="mode-tabs">
-              {(["deposit","withdraw","claim","compound","fund"] as Mode[]).map((item) => <button key={item} className={mode === item ? "active" : ""} onClick={() => setMode(item)}>{item}</button>)}
+        <section className="stats-stack" id="system">
+          <article className="panel stat-card"><span>TOTAL PRINCIPAL</span><strong>{bot(snapshot.totalPrincipal)}</strong><small>BOT across all positions</small></article>
+          <article className="panel stat-card reserve"><span>REWARD RESERVE</span><strong>{bot(snapshot.rewardReserve)}</strong><small>BOT currently claimable</small></article>
+          <article className="panel stat-card"><span>REWARDS ROUTED</span><strong>{bot(snapshot.totalPaid)}</strong><small>BOT claimed + compounded</small></article>
+        </section>
+
+        <section className="action-panel panel" id="position">
+          <div className="action-head"><div><span>ACTION DOCK</span><h2>{mode === "deposit" ? "Deposit BOT" : mode === "withdraw" ? "Withdraw principal" : mode === "claim" ? "Claim rewards" : mode === "compound" ? "Compound rewards" : "Fund reserve"}</h2></div><div className="mode-switch">{(["deposit","withdraw","claim","compound","fund"] as Mode[]).map((item) => <button key={item} className={mode === item ? "active" : ""} onClick={() => setMode(item)}>{item}</button>)}</div></div>
+          <div className="action-grid">
+            <div className="amount-module">
+              <span>{mode === "claim" || mode === "compound" ? "AVAILABLE REWARD" : "AMOUNT"}</span>
+              <div>{mode === "claim" || mode === "compound" ? <strong>{selectedValue}</strong> : <input inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="BOT amount"/>}<b>BOT</b></div>
+              <small>{mode === "fund" ? "Adds liquidity only to the reward reserve" : mode === "withdraw" ? `Available: ${bot(snapshot.principal, 6)} BOT` : "Native token · BOT Chain"}</small>
             </div>
-            <div className="control-body">
-              <div className="control-title"><span>SELECTED MANEUVER</span><h3>{mode === "deposit" ? "Add BOT to your position" : mode === "withdraw" ? "Withdraw principal" : mode === "claim" ? "Route rewards to wallet" : mode === "compound" ? "Convert rewards to principal" : "Supply the reward reserve"}</h3></div>
-              {mode !== "claim" && mode !== "compound" ? <label className="amount-field"><span>AMOUNT</span><div><input inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="BOT amount"/><b>BOT</b></div></label> : <div className="claim-value"><span>AVAILABLE NOW</span><strong>{selectedValue} BOT</strong></div>}
-              <div className="route-line"><div/><span>{mode === "fund" ? "PUBLIC RESERVE" : account ? short(account) : "WALLET NOT CONNECTED"}</span><ArrowUpRight size={17}/></div>
-              <button className="execute-button" onClick={execute} disabled={!canExecute}>{busy ? <LoaderCircle className="spin" size={19}/> : <Orbit size={19}/>} {primaryLabel}</button>
-              <p className="transaction-note">{notice || (mode === "fund" ? "Funding rewards does not create principal or ownership rights." : "Every transaction is executed directly by your connected wallet.")}</p>
-            </div>
+            <div className="route-module"><span>ROUTE</span><div className="route-node"><i/><p>{mode === "fund" ? "PUBLIC REWARD RESERVE" : account ? short(account) : "WALLET NOT CONNECTED"}</p><ArrowDown size={16}/></div><div className="route-node destination"><i/><p>{mode === "withdraw" || mode === "claim" ? "CONNECTED WALLET" : mode === "fund" ? "ORBITAL RESERVE" : "ACTIVE POSITION"}</p><Check size={16}/></div></div>
+            <div className="confirm-module"><CircleGauge size={25}/><p>{mode === "fund" ? "Reserve funding creates no ownership rights." : "Your wallet executes this transaction directly."}</p><button onClick={execute} disabled={!canExecute}>{busy ? <LoaderCircle className="spin" size={18}/> : <ArrowUpRight size={18}/>} {primaryLabel}</button><small>{notice || "Review the amount before confirming in your wallet."}</small></div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="protocol-section" id="protocol">
-        <div className="protocol-heading"><p className="eyebrow">THE FLIGHT PLAN</p><h2>Yield without<br/><em>the garden metaphor.</em></h2></div>
-        <div className="steps">
-          <article><span>01</span><Coins/><h3>Enter orbit</h3><p>Deposit native BOT. The contract records principal and starts a personal reward clock.</p></article>
-          <article><span>02</span><Gauge/><h3>Accrue</h3><p>A fixed 12.8% annual rate is calculated continuously from your last checkpoint.</p></article>
-          <article><span>03</span><Sparkles/><h3>Choose a route</h3><p>Claim rewards to the wallet, compound them into principal, or withdraw principal at any time.</p></article>
-        </div>
-      </section>
+        <section className="system-panel panel" id="security">
+          <div className="system-title"><span>VAULT ARCHITECTURE</span><h2>Visible reserves.<br/>Withdrawable principal.</h2><p>The contract does not mint rewards. Claims are paid only from the public reserve, while principal remains separately accounted.</p></div>
+          <div className="system-list"><div><Coins/><span><b>PRINCIPAL</b>Tracked per wallet</span><strong>{bot(snapshot.totalPrincipal)} BOT</strong></div><div><Gauge/><span><b>REWARD RATE</b>Constant annual rate</span><strong>12.80%</strong></div><div><Sparkles/><span><b>CHECKPOINT</b>Calculated on every action</span><strong>{snapshot.updatedAt ? new Date(snapshot.updatedAt * 1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "—"}</strong></div><div><ShieldCheck/><span><b>TRANSFER GUARD</b>Reentrancy protected</span><strong>ACTIVE</strong></div></div>
+        </section>
+      </main>
 
-      <section className="safety-section" id="safety">
-        <div><ShieldCheck size={34}/><p className="eyebrow red">SOLVENCY, NOT PROMISES</p><h2>Rewards have<br/>a visible fuel tank.</h2></div>
-        <div className="safety-copy"><p>The vault cannot mint value. Rewards are paid only from a separately funded on-chain reserve. If the reserve is empty, principal remains withdrawable but claims must wait for new funding.</p><ul><li><Check size={16}/> Principal tracked separately</li><li><Check size={16}/> No owner withdrawal path</li><li><Check size={16}/> No lock period</li><li><Check size={16}/> Non-reentrant transfers</li></ul></div>
-      </section>
-    </main>
-
-    <footer><div className="brand footer-brand"><span className="brand-mark"><Orbit size={20}/></span><span>ORBITAL</span></div><p>Native BOT yield, measured in motion.</p><div><a href={BOT_CHAIN.explorer} target="_blank">Explorer <ExternalLink size={13}/></a><a href="https://botchain.ai" target="_blank">BOT Chain <ExternalLink size={13}/></a>{CONTRACT_ADDRESS && <a href={`${BOT_CHAIN.explorer}/address/${CONTRACT_ADDRESS}`} target="_blank">Contract <ExternalLink size={13}/></a>}</div><small>UNAUDITED · USE SMALL VALUES</small></footer>
+      <footer className="terminal-footer"><span>ORBITAL / NATIVE YIELD ARRAY</span><div><a href={BOT_CHAIN.explorer} target="_blank">Explorer <ExternalLink size={12}/></a><a href="https://botchain.ai" target="_blank">BOT Chain <ExternalLink size={12}/></a>{CONTRACT_ADDRESS && <a href={`${BOT_CHAIN.explorer}/address/${CONTRACT_ADDRESS}`} target="_blank">Contract <ExternalLink size={12}/></a>}</div><b>UNAUDITED · USE SMALL VALUES</b></footer>
+    </div>
   </div>;
 }
 
