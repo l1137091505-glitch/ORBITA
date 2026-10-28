@@ -38,6 +38,10 @@ export function injected() {
 export async function connectWallet(): Promise<{ provider: BrowserProvider; signer: JsonRpcSigner; address: string }> {
   const ethereum = injected();
   if (!ethereum) throw new Error("No EVM wallet detected. Install or open a browser wallet first.");
+  // Authorize the account before requesting a network change. Some wallets
+  // reject wallet_switchEthereumChain with EIP-1193 code 4100 until the site
+  // has been granted account access.
+  await ethereum.request({ method: "eth_requestAccounts" });
   try {
     await ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BOT_CHAIN.chainIdHex }] });
   } catch (error) {
@@ -55,7 +59,6 @@ export async function connectWallet(): Promise<{ provider: BrowserProvider; sign
     });
   }
   const provider = new BrowserProvider(ethereum);
-  await provider.send("eth_requestAccounts", []);
   const signer = await provider.getSigner();
   return { provider, signer, address: await signer.getAddress() };
 }

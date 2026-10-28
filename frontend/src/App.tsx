@@ -21,8 +21,11 @@ const initialSnapshot: Snapshot = CONTRACT_ADDRESS ? {
 
 function messageOf(error: unknown) {
   if (error && typeof error === "object") {
-    const item = error as { shortMessage?: string; reason?: string; message?: string };
-    return item.shortMessage || item.reason || item.message || "Transaction failed.";
+    const item = error as { code?: number; shortMessage?: string; reason?: string; message?: string };
+    const message = item.shortMessage || item.reason || item.message || "Transaction failed.";
+    if (item.code === 4001 || /user rejected|user denied/i.test(message)) return "Wallet request cancelled. Approve the connection in your wallet and try again.";
+    if (item.code === 4100 || /not been authorized|unauthorized/i.test(message)) return "This site is not authorized yet. Open your wallet, approve this site, then connect again.";
+    return message;
   }
   return String(error || "Transaction failed.");
 }
