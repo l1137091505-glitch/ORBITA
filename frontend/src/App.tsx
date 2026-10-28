@@ -138,6 +138,8 @@ function App() {
         <div className="header-actions"><span className="live-pill"><i/> BOT CHAIN LIVE</span><button onClick={connect} disabled={busy === "connect"}>{busy === "connect" ? <LoaderCircle className="spin" size={17}/> : <Wallet size={17}/>} {account ? short(account) : "Connect wallet"}</button></div>
       </header>
 
+      {notice && <div className="wallet-notice" role="alert"><span>{notice}</span><div>{!injected() && <a href={`https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`} target="_blank" rel="noreferrer">OPEN IN METAMASK ↗</a>}<button onClick={() => setNotice("")} aria-label="Dismiss message">×</button></div></div>}
+
       {!CONTRACT_ADDRESS && <div className="terminal-alert"><strong>DEMO DATA</strong><span>Set VITE_ORBITAL_ADDRESS after contract deployment to enable transactions.</span></div>}
 
       <main className="dashboard" id="overview">
@@ -171,7 +173,7 @@ function App() {
               <small>{mode === "fund" ? "Adds liquidity only to the reward reserve" : mode === "withdraw" ? `Available: ${bot(snapshot.principal, 6)} BOT` : "Native token · BOT Chain"}</small>
             </div>
             <div className="route-module"><span>ROUTE</span><div className="route-node"><i/><p>{mode === "fund" ? "PUBLIC REWARD RESERVE" : account ? short(account) : "WALLET NOT CONNECTED"}</p><ArrowDown size={16}/></div><div className="route-node destination"><i/><p>{mode === "withdraw" || mode === "claim" ? "CONNECTED WALLET" : mode === "fund" ? "ORBITAL RESERVE" : "ACTIVE POSITION"}</p><Check size={16}/></div></div>
-            <div className="confirm-module"><CircleGauge size={25}/><p>{mode === "fund" ? "Reserve funding creates no ownership rights." : "Your wallet executes this transaction directly."}</p><button onClick={execute} disabled={!canExecute}>{busy ? <LoaderCircle className="spin" size={18}/> : <ArrowUpRight size={18}/>} {primaryLabel}</button><small>{notice || "Review the amount before confirming in your wallet."}</small></div>
+            <div className="confirm-module"><CircleGauge size={25}/><p>{mode === "fund" ? "Reserve funding creates no ownership rights." : "Your wallet executes this transaction directly."}</p><button onClick={execute} disabled={!canExecute}>{busy ? <LoaderCircle className="spin" size={18}/> : <ArrowUpRight size={18}/>} {primaryLabel}</button><small>Review the amount before confirming in your wallet.</small></div>
           </div>
         </section>
 
